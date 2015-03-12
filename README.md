@@ -1,13 +1,13 @@
 # SampleGem
 
-Demonstration Gem - showing what a well formed gem looks like.
+lt-core - LearningTapestry core modules and classes.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'sample-gem', :git => 'git://github.com/learningtapestry/sample-gem'
+gem 'lt-core', :git => 'git://github.com/learningtapestry/core'
 ```
 
 And then execute:
@@ -16,11 +16,25 @@ And then execute:
 
 ## Usage
 
+`lib/webapp.rb`:
 ```ruby
-SampleGem::Core::init
-# => "Init complete"
-SampleGem::Core::VERSION
-# => "0.0.1"
+require 'lt/webapp'
+
+class SampleWebApp < LT::WebApp::Base
+    get vroute(:home, '/') do
+        'Hello world'
+    end
+end
+```
+
+`config.ru`:
+```ruby
+require 'lt/core'
+path = File::expand_path(File::dirname(__FILE__))
+LT::Environment.boot_all(path)
+require File::join(path, 'lib', 'webapp.rb')
+SampleWebApp.boot
+run SampleWebApp
 ```
 
 ## Contributing
