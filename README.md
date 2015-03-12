@@ -1,4 +1,4 @@
-# SampleGem
+# lt-core
 
 lt-core - LearningTapestry core modules and classes.
 
