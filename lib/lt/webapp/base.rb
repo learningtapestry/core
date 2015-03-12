@@ -28,6 +28,7 @@ module LT
           set :dump_errors, false
           set :show_exceptions, false
         elsif LT.environment.development?
+          require 'sinatra/reloader'
           register Sinatra::Reloader
           enable :reloader
           also_reload File::join(LT.environment.lib_path, '/views/*.erb')
