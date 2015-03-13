@@ -91,5 +91,26 @@ module LT
         !draft
       end
     end # Proposal
+
+    module Raw
+      # returns an array of all the tables in schema public for current connection
+      def all_tables
+        all_tables_sql = "SELECT * FROM information_schema.tables where "+
+          "table_schema = 'public' and table_name <> 'schema_migrations'"
+        retval = []
+        results = ActiveRecord::Base.connection.execute(all_tables_sql)
+        results.each_with_index do |row, i|
+          retval << results[i]["table_name"]
+        end
+        retval
+      end
+
+      def truncate_all
+        raise(LT::Critical, "Truncate all is prohibited in production - do it manually.") if LT.env.production?
+        all_tables.each do |table_name|
+          ActiveRecord::Base.connection.execute("TRUNCATE #{table_name}")
+        end
+      end
+    end
   end
 end
