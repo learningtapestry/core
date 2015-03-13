@@ -92,7 +92,7 @@ module LT
       end
     end # Proposal
 
-    module Raw
+    module Raw class << self
       # returns an array of all the tables in schema public for current connection
       def all_tables
         all_tables_sql = "SELECT * FROM information_schema.tables where "+
@@ -111,6 +111,6 @@ module LT
           ActiveRecord::Base.connection.execute("TRUNCATE #{table_name}")
         end
       end
-    end
+    end; end # module Raw
   end
 end
