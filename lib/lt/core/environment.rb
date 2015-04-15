@@ -29,8 +29,8 @@ module LT
       init_logger
       boot_db(File::join(config_path, 'config.yml'))
       LT::RedisServer::boot(YAML::load_file(File::join(config_path, 'redis.yml'))[run_env])
-      configure_mailer
-      configure_merchant
+      configure_mailer if uses_mailer?
+      configure_merchant if uses_merchant?
       load_all_models
       require_env_specific_files
       logger.info("Core-app booted (mode: #{run_env})")
@@ -156,12 +156,12 @@ module LT
     end
 
     def configure_mailer
-      @pony_config = YAML::load(File.open(File::join(config_path, 'pony.yml')))[run_env]
+      @pony_config = YAML::load(File.open(mailer_config_path))[run_env]
       @pony_config.deep_symbolize_keys!
     end
 
     def configure_merchant
-      @merchant_config = YAML::load(File.open(File::join(config_path, 'merchant.yml')))[run_env]
+      @merchant_config = YAML::load(File.open(merchant_config_path))[run_env]
       @merchant_config.deep_symbolize_keys!
     end
 
@@ -219,6 +219,24 @@ module LT
     
     def debug!
       byebug if @debug
+    end
+
+    private
+
+    def mailer_config_path
+      File::join(config_path, 'pony.yml')
+    end
+
+    def merchant_config_path
+      File::join(config_path, 'merchant.yml')
+    end
+
+    def uses_mailer?
+      File.exist?(mailer_config_path)
+    end
+
+    def uses_merchant?
+      File.exist?(merchant_config_path)
     end
   end
 end
