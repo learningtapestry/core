@@ -91,6 +91,7 @@ module LT
       self.janitor_path = File::expand_path(File::join(lib_path,'/janitors'))
       self.web_root_path = File::expand_path(File::join(root_dir, '/web-public'))
       self.web_asset_path = File::expand_path(File::join(web_root_path, '/assets'))
+      self.partner_lib_path = File::expand_path(File::join(root_dir, '/partner-lib'))
       self.local_tmp = File::expand_path(File::join(root_dir, '/tmp'))
       self.tmp_path = File::exists?(local_tmp) ? local_tmp : Dir::tmpdir
       self.local_log = File::expand_path(File::join(root_dir, '/log'))
