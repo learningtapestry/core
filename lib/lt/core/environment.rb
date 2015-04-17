@@ -33,7 +33,7 @@ module LT
 
       env.init_logger
       env.boot_db(File::join(env.config_path, 'config.yml'))
-      LT::RedisServer::boot(YAML::load_file(File::join(config_path, 'redis.yml'))[run_env])
+      env.boot_redis(File::join(env.config_path, 'redis.yml'))
       env.configure_mailer if env.uses_mailer?
       env.configure_merchant if env.uses_merchant?
       env.load_all_models
@@ -130,6 +130,10 @@ module LT
         logger.error("Cannot connect to Postgres, connect string: #{dbconfig[run_env]}, error: #{e.message}")
         raise e
       end
+    end
+
+    def boot_redis(config_file)
+      LT::RedisServer::boot(YAML::load_file(config_file)[run_env])
     end
 
     def boot_ar_config(config_file)
