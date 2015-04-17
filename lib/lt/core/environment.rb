@@ -81,7 +81,6 @@ module LT
       end
       self.run_env = ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
       ENV['RAILS_ENV'] = run_env
-      Rails.env = run_env if defined? Rails
       self.root_dir = File::expand_path(app_root_dir)
       self.model_path = File::expand_path(File::join(root_dir, '/lib/models'))
       self.lib_path = File::expand_path(File::join(root_dir, '/lib'))
