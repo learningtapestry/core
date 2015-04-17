@@ -26,18 +26,21 @@ module LT
 
     def initialize(app_root_dir)
       setup_environment(app_root_dir)
-      init_logger
-      boot_db(File::join(config_path, 'config.yml'))
-      LT::RedisServer::boot(YAML::load_file(File::join(config_path, 'redis.yml'))[run_env])
-      configure_mailer if uses_mailer?
-      configure_merchant if uses_merchant?
-      load_all_models
-      require_env_specific_files
-      logger.info("Core-app booted (mode: #{run_env})")
     end
 
     def self.boot_all(app_root_dir = File::join(File::dirname(__FILE__),'..'))
-      LT.environment = Environment.new(app_root_dir)
+      env = Environment.new(app_root_dir)
+
+      env.init_logger
+      env.boot_db(File::join(env.config_path, 'config.yml'))
+      LT::RedisServer::boot(YAML::load_file(File::join(config_path, 'redis.yml'))[run_env])
+      env.configure_mailer if env.uses_mailer?
+      env.configure_merchant if env.uses_merchant?
+      env.load_all_models
+      env.require_env_specific_files
+      env.logger.info("Core-app booted (mode: #{env.run_env})")
+
+      LT.environment = env
     end
 
     def env?(type)
@@ -220,8 +223,6 @@ module LT
     def debug!
       byebug if @debug
     end
-
-    private
 
     def mailer_config_path
       File::join(config_path, 'pony.yml')
