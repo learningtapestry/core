@@ -77,7 +77,7 @@ module LT
         def get_server_url
           # force https in production, otherwise mirror incoming request
           # we have to mirror incoming port in testing, b/c the port number is always changing
-          if LT::production?
+          if LT.env.production?
             scheme = 'https'
             port = ''
           else
