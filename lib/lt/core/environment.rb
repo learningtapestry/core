@@ -162,6 +162,10 @@ module LT
       return false
     end
 
+    def ping_redis
+      redis.ping
+    end
+
     def configure_mailer
       @pony_config = YAML::load(File.open(mailer_config_path))[run_env]
       @pony_config.deep_symbolize_keys!
