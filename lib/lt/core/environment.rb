@@ -22,7 +22,7 @@ module LT
     attr_accessor :run_env, :logger, :root_dir, :model_path, :config_path,
       :test_path, :seed_path, :lib_path, :db_path, :tmp_path, :log_path,
       :message_path, :janitor_path, :web_root_path, :web_asset_path, :partner_lib_path,
-      :pony_config, :merchant_config, :local_tmp, :local_log
+      :pony_config, :merchant_config, :local_tmp, :local_log, :redis
 
     def initialize(app_root_dir)
       setup_environment(app_root_dir)
@@ -133,7 +133,7 @@ module LT
     end
 
     def boot_redis(config_file)
-      LT::RedisServer::boot(YAML::load_file(config_file)[run_env])
+      self.redis = RedisWrapper.new(YAML::load_file(config_file)[run_env])
     end
 
     def boot_ar_config(config_file)

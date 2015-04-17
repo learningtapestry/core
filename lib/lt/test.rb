@@ -53,7 +53,7 @@ module LT
       def setup_db_cleaner
         DatabaseCleaner[:active_record].strategy = @pg_strategy
         DatabaseCleaner[:redis].strategy = @redis_strategy
-        DatabaseCleaner[:redis, {connection: LT::RedisServer.connection_string}] 
+        DatabaseCleaner[:redis, { connection: LT.env.redis.connection_string }]
         # set database transaction, so we can revert seeds
         DatabaseCleaner.start
       end
