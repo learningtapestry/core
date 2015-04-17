@@ -47,6 +47,7 @@ module LT
         app.use Warden::Manager do |manager|
           manager.default_strategies :password
           manager.failure_app = app
+          manager.intercept_401 = false
           manager.serialize_into_session {|user| user.id}
           manager.serialize_from_session {|id| User.find_by(id: id)}
         end
