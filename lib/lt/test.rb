@@ -7,7 +7,6 @@ require 'capybara/poltergeist'
 require 'capybara/webkit'
 require 'benchmark'
 require 'byebug'
-require 'mail'
 require 'lt/core'
 
 module LT
