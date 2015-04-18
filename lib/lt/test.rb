@@ -24,6 +24,17 @@ module LT
       end
     end
 
+    # Allows testing Redis Access in isolation
+    class RedisTestBase < TestBase
+      def connection
+        LT.env.redis.connection
+      end
+
+      def setup
+        LT.env.boot_redis(File::join(LT.env.config_path, 'config.yml'))
+      end
+    end
+
     # provides for transactional cleanup of activerecord activity
     class DBTestBase < TestBase
       def initialize(*opts)
