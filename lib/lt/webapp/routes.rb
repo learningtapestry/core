@@ -60,23 +60,24 @@ module LT
         def get_persistent_session
           # set up UI session, if we don't have one on the URL line
           ui_id = get_ui_id
-          LT::RedisServer::get_ui_session(ui_id)
+          LT.env.redis.get_ui_session(ui_id)
         end
 
         def reset_persistent_session
           @ui_id = nil
         end
+
         # Purpose: Set the persistent session into redis
         # Returns: Session hash as sent to redis
         def set_persistent_session(session)
-          LT::RedisServer::set_ui_session(get_ui_id, session)
+          LT.env.redis.set_ui_session(get_ui_id, session)
           session
         end
 
         def get_server_url
           # force https in production, otherwise mirror incoming request
           # we have to mirror incoming port in testing, b/c the port number is always changing
-          if LT::production?
+          if LT.env.production?
             scheme = 'https'
             port = ''
           else

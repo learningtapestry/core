@@ -7,7 +7,6 @@ require 'capybara/poltergeist'
 require 'capybara/webkit'
 require 'benchmark'
 require 'byebug'
-require 'mail'
 require 'lt/core'
 
 module LT
@@ -22,6 +21,17 @@ module LT
         LT.environment.logger.level = new_level
         yield
         LT.environment.logger.level = orig_log_level
+      end
+    end
+
+    # Allows testing Redis Access in isolation
+    class RedisTestBase < TestBase
+      def connection
+        LT.env.redis.connection
+      end
+
+      def setup
+        LT.env.boot_redis(File::join(LT.env.config_path, 'config.yml'))
       end
     end
 
@@ -53,7 +63,7 @@ module LT
       def setup_db_cleaner
         DatabaseCleaner[:active_record].strategy = @pg_strategy
         DatabaseCleaner[:redis].strategy = @redis_strategy
-        DatabaseCleaner[:redis, {connection: LT::RedisServer.connection_string}] 
+        DatabaseCleaner[:redis, { connection: LT.env.redis.connection_string }]
         # set database transaction, so we can revert seeds
         DatabaseCleaner.start
       end

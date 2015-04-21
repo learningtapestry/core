@@ -22,22 +22,25 @@ module LT
     attr_accessor :run_env, :logger, :root_dir, :model_path, :config_path,
       :test_path, :seed_path, :lib_path, :db_path, :tmp_path, :log_path,
       :message_path, :janitor_path, :web_root_path, :web_asset_path, :partner_lib_path,
-      :pony_config, :merchant_config, :local_tmp, :local_log
+      :pony_config, :merchant_config, :local_tmp, :local_log, :redis
 
     def initialize(app_root_dir)
       setup_environment(app_root_dir)
-      init_logger
-      boot_db(File::join(config_path, 'config.yml'))
-      LT::RedisServer::boot(YAML::load_file(File::join(config_path, 'redis.yml'))[run_env])
-      configure_mailer if uses_mailer?
-      configure_merchant if uses_merchant?
-      load_all_models
-      require_env_specific_files
-      logger.info("Core-app booted (mode: #{run_env})")
     end
 
     def self.boot_all(app_root_dir = File::join(File::dirname(__FILE__),'..'))
-      LT.environment = Environment.new(app_root_dir)
+      env = Environment.new(app_root_dir)
+
+      env.init_logger
+      env.boot_db(File::join(env.config_path, 'config.yml'))
+      env.boot_redis(File::join(env.config_path, 'redis.yml'))
+      env.configure_mailer if env.uses_mailer?
+      env.configure_merchant if env.uses_merchant?
+      env.load_all_models
+      env.require_env_specific_files
+      env.logger.info("Core-app booted (mode: #{env.run_env})")
+
+      LT.environment = env
     end
 
     def env?(type)
@@ -78,7 +81,6 @@ module LT
       end
       self.run_env = ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
       ENV['RAILS_ENV'] = run_env
-      Rails.env = run_env if defined? Rails
       self.root_dir = File::expand_path(app_root_dir)
       self.model_path = File::expand_path(File::join(root_dir, '/lib/models'))
       self.lib_path = File::expand_path(File::join(root_dir, '/lib'))
@@ -89,6 +91,7 @@ module LT
       self.janitor_path = File::expand_path(File::join(lib_path,'/janitors'))
       self.web_root_path = File::expand_path(File::join(root_dir, '/web-public'))
       self.web_asset_path = File::expand_path(File::join(web_root_path, '/assets'))
+      self.partner_lib_path = File::expand_path(File::join(root_dir, '/partner-lib'))
       self.local_tmp = File::expand_path(File::join(root_dir, '/tmp'))
       self.tmp_path = File::exists?(local_tmp) ? local_tmp : Dir::tmpdir
       self.local_log = File::expand_path(File::join(root_dir, '/log'))
@@ -129,6 +132,10 @@ module LT
       end
     end
 
+    def boot_redis(config_file)
+      self.redis = RedisWrapper.new(YAML::load_file(config_file)[run_env])
+    end
+
     def boot_ar_config(config_file)
       # http://stackoverflow.com/questions/20361428/rails-i18n-validation-deprecation-warning
       # SM: Don't really know what this means - hopefully doesn't matter
@@ -153,6 +160,10 @@ module LT
         return false
       end
       return false
+    end
+
+    def ping_redis
+      redis.ping
     end
 
     def configure_mailer
@@ -220,8 +231,6 @@ module LT
     def debug!
       byebug if @debug
     end
-
-    private
 
     def mailer_config_path
       File::join(config_path, 'pony.yml')
