@@ -2,9 +2,12 @@ module LT
   module Seeds
     SEED_FILES = '.seeds.rb'
     class << self
-      def seed!
-        # this loads all the seeds in the root (common seeds)
-        retval = LT::Seeds::load_seeds
+      def load_seed
+        LT.env.load_all_models
+
+        # This loads all the seeds in the root (common seeds)
+        retval = load_seeds
+
         # This runs all seeds for environment, eg "test"
         env_seeds = File::join('./',LT.env.run_env)
         retval += LT::Seeds::load_seeds(env_seeds)
@@ -17,11 +20,8 @@ module LT
         fullpath = File::expand_path(File::join(LT.env.seed_path,path))
         seedfiles = Dir::glob(File::join(fullpath,'*'+SEED_FILES))
         seedfiles.each do |seedfile|
-          load_seed(seedfile)           
+          load File::expand_path(seedfile)
         end
-      end # load_seeds
-      def load_seed(seedfile)
-        load File::expand_path(seedfile)
       end
     end #class << self
   end # Seeds

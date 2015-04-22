@@ -1,7 +1,3 @@
-require 'bundler'
-Bundler.setup
-
-require 'lt/core'
 require 'irb'
 require 'term/ansicolor'
 require 'open3'
@@ -12,70 +8,29 @@ module LT
   end; end
 end
 
-## AR 4: The following section allows us to run AR w/out Rails
-# Overwrite the already existing Rake task "load_config"
-class Rake::Task
-  def overwrite(&block)
-    @actions.clear
-    enhance(&block)
-  end
-end
+require 'lt/core'
 
-# Load the ActiveRecord tasks
-spec = Gem::Specification.find_by_name("activerecord")
-load File.join(spec.gem_dir, "lib", "active_record", "railties", "databases.rake")
-
-# Overwrite the load config 
-Rake::Task["db:load_config"].overwrite do
-  Rake::Task[:'lt:boot'].invoke
-end
-
-# AR Migrations need an environment with an already established database connection
-task :environment => ["db:load_config"] do
-end
-## End AR 4 installation
-
-desc 'Print all rake tasks'
-task :default do
-  system "rake --tasks"
-end
-
+#
+# LT provided rake tasks. Most of them require each application to implement
+# their :boot task.
+#
 namespace :lt do
-  task :full_tests do
-    Rake::Task[:'lt:test:run_full_tests'].invoke
+  task full_tests: :'test:run_full_tests'
+
+  task tests: :'test:run_tests'
+
+  #
+  # TODO - set port/server from environment var
+  #
+  desc 'Run WebApp server - this starts the webserver'
+  task server: :boot do
+    rackup_file = File.join(Dir.pwd, 'config.ru')
+    Kernel.system("rackup -p 8080 -o localhost #{rackup_file}")
   end
 
-  task :tests do
-    Rake::Task[:'lt:test:run_tests'].invoke
-  end
-  
-  namespace :webapp do
-    desc "Boot WebApp environment"
-    task :boot do
-      Rake::Task[:'lt:boot'].invoke
-    end
-    desc "Run WebApp server - this starts the webserver"
-    task :start do 
-      path = File::expand_path(File::dirname(__FILE__))
-      rackup_file = File::join(path, 'lib', 'webapp.ru')
-      # TODO - set port/server from environment var
-      run_cmd = "rackup -p 8080 -o localhost #{rackup_file}"
-      $stdout.sync = true
-      Kernel.system(run_cmd)
-    end
-    desc "Run WebApp server - this starts the webserver in dev mode with rerun"
-    task :start_dev do 
-      path = File::expand_path(File::dirname(__FILE__))
-      rackup_file = File::join(path, 'lib', 'webapp.ru')
-      # TODO - set port/server from environment var
-      run_cmd = "rerun -- rackup -p 8080 -o localhost #{rackup_file}"
-      $stdout.sync = true
-      Kernel.system(run_cmd)
-    end
-  end # namespace :webapp
-
-  desc "Boot up a console with required context"
-  task :console => [:boot] do
+  desc 'Boot up a console with required context'
+  task console: :boot do
+    require 'irb'
     IRB.setup nil
     IRB.conf[:MAIN_CONTEXT] = IRB::Irb.new.context
     require 'irb/ext/multi-irb'
@@ -83,7 +38,7 @@ namespace :lt do
   end
 
   desc "Boot up a console with alternative ruby interactive 'pry'"
-  task :console_pry => [:boot] do
+  task console_pry: :boot do
     begin
       require 'pry'; binding.pry
     rescue LoadError
@@ -92,9 +47,9 @@ namespace :lt do
     end
   end
 
-  desc "Boot Core-app system"
+  desc 'Boot Core-app system'
   task :boot do
-    LT::Environment.boot_all(File::dirname(__FILE__))
+    LT::Environment.boot_all(File.dirname(__FILE__))
   end
 
   desc "Install all gems via bundle"
@@ -103,40 +58,40 @@ namespace :lt do
     LT.environment.logger.debug(output)
   end
 
-  namespace :db do
-    desc "Completely teardown and rebuild database, including seeding it with data."
-    task :reset => [:'lt:boot'] do
-      abort "Not permitted in production" if LT.environment.production?
-      Rake::Task[:'db:drop'].invoke
-      Rake::Task[:'db:create'].invoke
-      Rake::Task[:'db:migrate'].invoke
-      puts "Seeding data.." if LT.environment.development?
-      Rake::Task[:'lt:db:seed'].invoke if LT.environment.development?
-    end
+  require 'rake/testtask'
 
-    desc "Seed environment db with data (generally speaking, don't do this in testing/production env)"
-    task :seed => [:'lt:boot'] do 
-      LT.environment.Seeds.seed!
-    end
-  end # lt:db
+  Rake::TestTask.new do |t|
+    t.libs << 'test'
+    t.pattern = 'test/**/*_test.rb'
+    t.verbose = true
+    # TODO: fix warnings and enable
+    # t.warning = true
+  end
 
   namespace :test do
-    desc "Run complete test suite include DB teardown/rebuild/reseed"
-    task :run_full_tests => [:'lt:test:boot', :'lt:test:db:full_reset'] do
-      Rake::Task[:'lt:bundle_install'].invoke
-      LT.environment.logger.info("Test setup complete. Running all tests.")
-      LT.environment.run_tests
-    end
-    
-    desc "Run complete test suite w/out DB reset"
-    task :run_tests => [:'lt:test:boot', 
-      :'lt:test:db:migrate_tables'] do
-      LT.environment.run_tests
+    namespace :db do
+      desc 'Configure database for the test environment'
+      task :setup do
+        LT.environment = LT::Environment.new(Dir.pwd)
+        LT.env.run_env = 'test'
+        LT.env.boot_db('config.yml')
+      end
+
+      desc 'Drop test database'
+      task drop_db: [:setup, 'db:drop']
+
+      desc 'Drop and recreate test database and run migrations'
+      task full_reset: [:drop_db, 'db:create', 'db:migrate']
     end
 
-    desc "Run single test file"
-    task :run_test, [:testfile] => [:'lt:test:boot', 
-      :'lt:test:db:migrate_tables'] do |t, args|
+    desc 'Run complete test suite including teardown, rebuild & reseed'
+    task run_full_tests: [:'db:drop_db', 'db:create', 'db:schema:load', :test]
+
+    desc 'Run complete test suite w/out DB reset or bundling'
+    task :run_tests => [:'db:setup', 'db:migrate', :test]
+
+    desc 'Runs a single test file'
+    task :run_test, [:testfile] => [:'db:setup', :'db:migrate'] do |t, args|
       arg_filename = args[:testfile]
       # if we are given a file with no path, search test folder for the file to run
       if arg_filename == File::basename(arg_filename) then
@@ -144,42 +99,12 @@ namespace :lt do
       else
         filename = arg_filename
       end
-      LT.environment.run_test(File::expand_path(filename), LT.environment.test_path)
+
+      system("ruby -Ilib -Itest #{filename}")
     end
 
-    task :boot do
-      # Force us into testing environment, then boot core-app
-      ENV['RAILS_ENV'] = 'test'
-      Rake::Task[:'lt:boot'].invoke
-      LT.environment.testing!
-    end
-    namespace :db do
-      desc "Drop and recreate test db, run migrations"
-      task :full_reset => [:'lt:boot', :drop_db, :create_db, :migrate_tables] do
-        LT.environment.logger.info("Performing full DB testing reset")
-      end
-      desc "Drop test db"
-      task :drop_db do
-        ## BUG: If DB can't be dropped, this command does not raise an exception
-        ##      It only prints a screen warning which is easy to miss
-        ## Rec: Raise exception if DB exists after dropping?
-        LT.environment.testing!
-        LT.environment.logger.info("Dropping testing DB")
-        Rake::Task[:'db:drop'].invoke
-      end
-      task :create_db do
-        LT.environment.testing!
-        LT.environment.logger.info("Creating testing DB")
-        Rake::Task[:'db:create'].invoke
-      end
-      task :migrate_tables do
-        LT.environment.testing!
-        LT.environment.logger.info("Migrating testing DB")
-        Rake::Task[:'db:migrate'].invoke
-      end
-    end
     desc "Monitor files for changes and run a single test when a change is detected"
-    task :monitor => [:'lt:test:boot', :'lt:test:db:migrate_tables'] do |t, args|
+    task :monitor => [:'db:setup', :'db:migrate'] do |t, args|
       keep_running = true
       last_test_file = nil
       test_file = ""
@@ -247,3 +172,13 @@ namespace :lt do
   end # test namesapce
 end # lt namespace
 
+task :environment do
+  LT.environment = LT::Environment.new(Dir.pwd)
+  LT.env.run_env = 'development'
+  LT.env.boot_db('config.yml')
+end
+
+Rake::Task['environment'].invoke
+
+require 'bundler/setup'
+load 'active_record/railties/databases.rake'
