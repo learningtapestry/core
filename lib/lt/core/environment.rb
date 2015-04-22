@@ -43,16 +43,14 @@ module LT
     end
 
     def env?(type)
-      (self.run_env == (type && ENV['RAILS_ENV'] = type))    
+      self.run_env == type
     end
 
     def testing?
-      # we are only in a testing environment if RAILS_ENV and run_env agree on it
       env?('test')
     end
 
     def development?
-      # we are only in a development environment if RAILS_ENV and run_env agree on it
       env?('development')
     end
 
@@ -71,15 +69,10 @@ module LT
 
     # app_root_dir is the path to the root of the application being booted
     def setup_environment(app_root_dir)
-      # null out empty string env vars
-      if ENV['RAILS_ENV'] && ENV['RAILS_ENV'].empty? then
-        ENV['RAILS_ENV'] = nil
-      end
       if ENV['RACK_ENV'] && ENV['RACK_ENV'].empty? then
         ENV['RACK_ENV'] = nil
       end
-      self.run_env = ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
-      ENV['RAILS_ENV'] = run_env
+      self.run_env = ENV['RACK_ENV'] || 'development'
       self.root_dir = File::expand_path(app_root_dir)
       self.model_path = File::expand_path(File::join(root_dir, '/lib/models'))
       self.lib_path = File::expand_path(File::join(root_dir, '/lib'))
