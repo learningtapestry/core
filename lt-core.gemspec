@@ -43,4 +43,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'selenium-webdriver', '>=2.43.0'
   spec.add_dependency 'capybara-webkit', '>=1.3.1'
   spec.add_dependency 'term-ansicolor', '>= 1.3.0'
+
+  # Dev dependencies.
+  spec.add_development_dependency 'byebug'
+  spec.add_development_dependency 'pry'
+  spec.add_development_dependency 'pry-byebug'
 end
