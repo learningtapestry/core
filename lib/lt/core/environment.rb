@@ -113,9 +113,13 @@ module LT
     def require_env_specific_files
       # Note to future self: do not create production specific requirements
       if development? then
-        require 'pry'
-        require 'pry-stack_explorer'
-        require 'byebug'
+        %w(byebug pry pry-byebug).each do |dep|
+          begin
+            require dep
+          rescue LoadError
+            logger.info "#{dep} is not available and was not loaded."
+          end
+        end
       end
     end
 
