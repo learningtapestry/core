@@ -83,9 +83,13 @@ namespace :lt do
   end
 
   desc "Boot up a console with alternative ruby interactive 'pry'"
-  task :console_pry do
-    Rake::Task[:'lt:boot'].invoke
-    binding.pry
+  task :console_pry => [:boot] do
+    begin
+      require 'pry'; binding.pry
+    rescue LoadError
+      LT.env.logger.info('pry is not installed. Dropping into regular console.')
+      Rake::Task[:console].invoke
+    end
   end
 
   desc "Boot Core-app system"

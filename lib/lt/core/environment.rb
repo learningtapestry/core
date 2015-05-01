@@ -37,7 +37,6 @@ module LT
       env.configure_mailer if env.uses_mailer?
       env.configure_merchant if env.uses_merchant?
       env.load_all_models
-      env.require_env_specific_files
       env.logger.info("Core-app booted (mode: #{env.run_env})")
 
       LT.environment = env
@@ -107,15 +106,6 @@ module LT
       models.each do |file| 
         full_file =  File::join(model_path, File::basename(file))
         require full_file
-      end
-    end
-
-    def require_env_specific_files
-      # Note to future self: do not create production specific requirements
-      if development? then
-        require 'pry'
-        require 'pry-stack_explorer'
-        require 'byebug'
       end
     end
 
@@ -217,19 +207,6 @@ module LT
         self.logger.warn "Log4r configuration file not found, attempted: #{config_path + "/log4r.yml"}"
         self.logger.info "Log4r outputting to stdout with DEBUG level."
       end
-    end
-
-    # debug tools to permit running test code and having other parts of the application
-    # know to run a break point. This allows breaking out only during a specific test case
-    # even if the same point of code is accessed many times during the test.
-    def debug
-      @debug = true
-      yield
-      @debug = false
-    end
-    
-    def debug!
-      byebug if @debug
     end
 
     def mailer_config_path
