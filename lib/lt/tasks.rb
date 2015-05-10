@@ -1,4 +1,3 @@
-require 'irb'
 require 'term/ansicolor'
 require 'open3'
 
