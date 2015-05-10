@@ -32,10 +32,10 @@ module LT
       env = Environment.new(app_root_dir)
 
       env.init_logger
-      env.boot_db(File::join(env.config_path, 'config.yml'))
-      env.boot_redis(File::join(env.config_path, 'redis.yml'))
-      env.configure_mailer if env.uses_mailer?
-      env.configure_merchant if env.uses_merchant?
+      env.boot_db('config.yml')
+      env.boot_redis('redis.yml')
+      env.configure_mailer('pony.yml')
+      env.configure_merchant('merchant.yml')
       env.load_all_models
       env.logger.info("Core-app booted (mode: #{env.run_env})")
 
@@ -112,18 +112,18 @@ module LT
     def boot_db(config_file)
       # Connect to DB
       begin
-        boot_ar_config(config_file)
-        dbconfig = YAML::load(File.open(config_file))
+        boot_ar_config(full_config_path(config_file))
+        dbconfig = load_required_config(config_file)
         # TODO:  Need better error message of LT::run_env is not defined; occurred multiple times in testing
-        ActiveRecord::Base.establish_connection(dbconfig[run_env])
+        ActiveRecord::Base.establish_connection(dbconfig)
       rescue Exception => e
-        logger.error("Cannot connect to Postgres, connect string: #{dbconfig[run_env]}, error: #{e.message}")
+        logger.error("Cannot connect to Postgres, connect string: #{dbconfig}, error: #{e.message}")
         raise e
       end
     end
 
     def boot_redis(config_file)
-      self.redis = RedisWrapper.new(YAML::load_file(config_file)[run_env])
+      @redis ||= RedisWrapper.new(load_required_config(config_file))
     end
 
     def boot_ar_config(config_file)
@@ -142,7 +142,7 @@ module LT
     def get_db_name
       return ActiveRecord::Base.connection_config[:database]
     end
-    
+
     def ping_db
       begin
         return ActiveRecord::Base.connection.active?
@@ -156,14 +156,26 @@ module LT
       redis.ping
     end
 
-    def configure_mailer
-      @pony_config = YAML::load(File.open(mailer_config_path))[run_env]
-      @pony_config.deep_symbolize_keys!
+    def configure_mailer(file)
+      @pony_config ||= load_optional_config(file)
     end
 
-    def configure_merchant
-      @merchant_config = YAML::load(File.open(merchant_config_path))[run_env]
-      @merchant_config.deep_symbolize_keys!
+    def configure_merchant(file)
+      @merchant_config ||= load_optional_config(file)
+    end
+
+    def load_required_config(file)
+      path = full_config_path(file)
+      raise LT::FileNotFound.new("#{path} not found") unless File.exist?(path)
+
+      YAML.load_file(path)[run_env].deep_symbolize_keys
+    end
+
+    def load_optional_config(file)
+      path = full_config_path(file)
+      return unless File.exist?(path)
+
+      YAML.load_file(path)[run_env].deep_symbolize_keys
     end
 
     def run_tests(path=nil)
@@ -209,20 +221,10 @@ module LT
       end
     end
 
-    def mailer_config_path
-      File::join(config_path, 'pony.yml')
-    end
+    private
 
-    def merchant_config_path
-      File::join(config_path, 'merchant.yml')
-    end
-
-    def uses_mailer?
-      File.exist?(mailer_config_path)
-    end
-
-    def uses_merchant?
-      File.exist?(merchant_config_path)
+    def full_config_path(file)
+      File.join(config_path, file)
     end
   end
 end

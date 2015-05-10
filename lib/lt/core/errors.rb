@@ -10,4 +10,5 @@ module LT
   class PathNotFound < BaseException; end
   class ModelNotFound < BaseException; end
   class InvalidFileFormat < BaseException; end
+  class APIRequestFailure < BaseException; end
 end
