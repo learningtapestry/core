@@ -71,8 +71,7 @@ namespace :lt do
     namespace :db do
       desc 'Configure database for the test environment'
       task :setup do
-        LT.environment = LT::Environment.new(Dir.pwd)
-        LT.env.run_env = 'test'
+        LT.environment = LT::Environment.new(Dir.pwd, 'test')
         LT.env.boot_db('config.yml')
       end
 
@@ -172,8 +171,7 @@ namespace :lt do
 end # lt namespace
 
 task :environment do
-  LT.environment = LT::Environment.new(Dir.pwd)
-  LT.env.run_env = 'development'
+  LT.environment = LT::Environment.new(Dir.pwd, 'development')
   LT.env.boot_db('config.yml')
 end
 

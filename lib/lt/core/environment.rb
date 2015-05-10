@@ -29,12 +29,12 @@ module LT
       :message_path, :janitor_path, :web_root_path, :web_asset_path, :partner_lib_path,
       :pony_config, :merchant_config, :local_tmp, :local_log, :redis
 
-    def initialize(app_root_dir)
-      setup_environment(app_root_dir)
+    def initialize(app_root_dir, env = 'development')
+      setup_environment(app_root_dir, env)
     end
 
-    def self.boot_all(app_root_dir = File::join(File::dirname(__FILE__),'..'))
-      env = Environment.new(app_root_dir)
+    def self.boot_all(app_root_dir, env = 'development')
+      env = Environment.new(app_root_dir, env)
 
       env.init_logger
       env.boot_db('config.yml')
@@ -73,11 +73,8 @@ module LT
     end
 
     # app_root_dir is the path to the root of the application being booted
-    def setup_environment(app_root_dir)
-      if ENV['RACK_ENV'] && ENV['RACK_ENV'].empty? then
-        ENV['RACK_ENV'] = nil
-      end
-      self.run_env = ENV['RACK_ENV'] || 'development'
+    def setup_environment(app_root_dir, env)
+      self.run_env = env
       self.root_dir = File::expand_path(app_root_dir)
       self.model_path = File::expand_path(File::join(root_dir, '/lib/models'))
       self.lib_path = File::expand_path(File::join(root_dir, '/lib'))
