@@ -49,7 +49,7 @@ namespace :lt do
 
   desc 'Boot Core-app system'
   task :boot do
-    LT::Environment.boot_all(File.dirname(__FILE__))
+    LT::Environment.boot_all(Dir.pwd)
   end
 
   desc "Install all gems via bundle"
