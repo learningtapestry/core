@@ -51,12 +51,6 @@ namespace :lt do
     LT::Environment.boot_all(Dir.pwd)
   end
 
-  desc "Install all gems via bundle"
-  task :bundle_install => [:'lt:boot'] do
-    output = `bundle install`
-    LT.environment.logger.debug(output)
-  end
-
   require 'rake/testtask'
 
   Rake::TestTask.new do |t|
