@@ -5,6 +5,9 @@ require 'log4r/yamlconfigurator'
 require 'ostruct'
 require 'erubis'
 
+require 'active_record'
+require 'lt/core/seeds'
+
 module LT
   class << self
     attr_accessor :environment
@@ -15,6 +18,8 @@ module LT
   end
 
   class Environment
+    include ActiveRecord::Tasks
+
     # run_env holds running environment: production|staging|test|development
     # root_dir holds application root (where this Rake file is located)
     # model_path holds the folder where our models are stored
@@ -24,12 +29,12 @@ module LT
       :message_path, :janitor_path, :web_root_path, :web_asset_path, :partner_lib_path,
       :pony_config, :merchant_config, :local_tmp, :local_log, :redis
 
-    def initialize(app_root_dir)
-      setup_environment(app_root_dir)
+    def initialize(app_root_dir, env = 'development')
+      setup_environment(app_root_dir, env)
     end
 
-    def self.boot_all(app_root_dir = File::join(File::dirname(__FILE__),'..'))
-      env = Environment.new(app_root_dir)
+    def self.boot_all(app_root_dir, env = 'development')
+      env = Environment.new(app_root_dir, env)
 
       env.init_logger
       env.boot_db('config.yml')
@@ -43,16 +48,14 @@ module LT
     end
 
     def env?(type)
-      (self.run_env == (type && ENV['RAILS_ENV'] = type))    
+      self.run_env == type
     end
 
     def testing?
-      # we are only in a testing environment if RAILS_ENV and run_env agree on it
       env?('test')
     end
 
     def development?
-      # we are only in a development environment if RAILS_ENV and run_env agree on it
       env?('development')
     end
 
@@ -70,16 +73,8 @@ module LT
     end
 
     # app_root_dir is the path to the root of the application being booted
-    def setup_environment(app_root_dir)
-      # null out empty string env vars
-      if ENV['RAILS_ENV'] && ENV['RAILS_ENV'].empty? then
-        ENV['RAILS_ENV'] = nil
-      end
-      if ENV['RACK_ENV'] && ENV['RACK_ENV'].empty? then
-        ENV['RACK_ENV'] = nil
-      end
-      self.run_env = ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
-      ENV['RAILS_ENV'] = run_env
+    def setup_environment(app_root_dir, env)
+      self.run_env = env
       self.root_dir = File::expand_path(app_root_dir)
       self.model_path = File::expand_path(File::join(root_dir, '/lib/models'))
       self.lib_path = File::expand_path(File::join(root_dir, '/lib'))
@@ -109,34 +104,18 @@ module LT
       end
     end
 
-    def boot_db(config_file)
-      # Connect to DB
-      begin
-        boot_ar_config(full_config_path(config_file))
-        dbconfig = load_required_config(config_file)
-        # TODO:  Need better error message of LT::run_env is not defined; occurred multiple times in testing
-        ActiveRecord::Base.establish_connection(dbconfig)
-      rescue Exception => e
-        logger.error("Cannot connect to Postgres, connect string: #{dbconfig}, error: #{e.message}")
-        raise e
-      end
+    def boot_db(file)
+      config = db_config(file)
+
+      ActiveRecord::Base.configurations = config
+      ActiveRecord::Base.establish_connection(DatabaseTasks.env.to_sym)
+    rescue => e
+      logger.error("Cannot connect to DB(#{config}), error: #{e.message}")
+      raise e
     end
 
     def boot_redis(config_file)
       @redis ||= RedisWrapper.new(load_required_config(config_file))
-    end
-
-    def boot_ar_config(config_file)
-      # http://stackoverflow.com/questions/20361428/rails-i18n-validation-deprecation-warning
-      # SM: Don't really know what this means - hopefully doesn't matter
-      I18n.config.enforce_available_locales = true
-      ActiveRecord::Base.configurations = ActiveRecord::Tasks::DatabaseTasks.database_configuration = YAML::load_file(config_file)
-      ActiveRecord::Tasks::DatabaseTasks.db_dir = db_path
-      ActiveRecord::Tasks::DatabaseTasks.env    = run_env
-      #If you need to customize AR model pluralization do it here
-      ActiveSupport::Inflector.inflections do |inflect|
-        #inflect.irregular 'weird_singular_model_thingy', 'wierd_plural_model_thingies'
-      end
     end
 
     def get_db_name
@@ -178,28 +157,6 @@ module LT
       YAML.load_file(path)[run_env].deep_symbolize_keys
     end
 
-    def run_tests(path=nil)
-      path ||= test_path
-      test_file_glob = File::expand_path(File::join(path, '**/*_test.rb'))
-      testfiles = Dir::glob(test_file_glob)
-      testfiles.each do |testfile|
-        run_test(testfile, path)
-      end
-    end
-
-    # will test a single file in test folder
-    # test file must self-run when "required"
-    # TODO: Fix Rake which calls this function with a different signature
-    def run_test(testfile, test_path)
-      testing!
-      # add testing path if it is missing from file
-      if testfile == File::basename(testfile) then
-        testfile = File::join(test_path, File::basename(testfile))
-      end
-      #TODO: This should be load not require I think (for re-entrant code running)
-      require testfile
-    end # run_test
-
     # will initialize the logger
     def init_logger
       # prevent us from re-initializing the logger if it's already created
@@ -225,6 +182,18 @@ module LT
 
     def full_config_path(file)
       File.join(config_path, file)
+    end
+
+    def db_config(file)
+      path = full_config_path(file)
+      raise LT::FileNotFound.new('No DB config found') unless File.exist?(path)
+
+      DatabaseTasks.root = root_dir
+      DatabaseTasks.env = run_env
+      DatabaseTasks.db_dir = db_path
+      DatabaseTasks.migrations_paths = File.join(db_path, 'migrate')
+      DatabaseTasks.seed_loader = LT::Seeds
+      DatabaseTasks.database_configuration = YAML::load_file(path)
     end
   end
 end
