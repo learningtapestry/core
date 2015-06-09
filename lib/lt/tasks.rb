@@ -165,7 +165,9 @@ namespace :lt do
 end # lt namespace
 
 task :environment do
-  LT.environment = LT::Environment.new(Dir.pwd, 'development')
+  env = ENV['RACK_ENV'] || 'development'
+
+  LT.environment = LT::Environment.new(Dir.pwd, env)
   LT.env.boot_db('config.yml')
 end
 
