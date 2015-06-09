@@ -162,6 +162,39 @@ namespace :lt do
       end # while keep_running do -- main loop
     end # task :monitor
   end # test namesapce
+
+  namespace :config do
+    require 'lt/core/configuration'
+
+    desc 'Generate the environment configuration file'
+    task :generate_env do
+      args = ARGV.dup
+      args.shift
+      config = LT::Configuration.new(Dir.pwd)
+      args.each do |arg|
+        k, v = arg.split('=', 2)
+        config[k] = v
+      end
+      config.save
+      exit 0
+    end
+
+    desc 'Generate configuration files from templates'
+    task generate_config: [:'lt:boot'] do
+      args = ARGV.dup
+      args.shift
+      config = LT::Configuration.load(Dir.pwd)
+      args.each do |arg|
+        File.write(
+          File.join(LT.env.config_path, arg),
+          config.render(File.read(File.join(LT.env.config_path, "#{arg}.erb")))
+        )
+      end
+      exit 0
+    end
+
+  end
+
 end # lt namespace
 
 task :environment do
