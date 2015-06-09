@@ -180,7 +180,9 @@ namespace :lt do
     end
 
     desc 'Generate configuration files from templates'
-    task generate_config: [:'lt:boot'] do
+    task :generate_config do
+      LT.environment = LT::Environment.new(Dir.pwd, ENV['RACK_ENV'] || 'development')
+
       args = ARGV.dup
       args.shift
       config = LT::Configuration.load(Dir.pwd)
