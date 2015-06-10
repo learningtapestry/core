@@ -1,6 +1,5 @@
 module LT
   module Seeds
-    SEED_FILES = '.seeds.rb'
     class << self
       def load_seed
         LT.env.load_all_models
@@ -13,12 +12,13 @@ module LT
         retval += LT::Seeds::load_seeds(env_seeds)
         retval
       end
-      # This looks in the path provided for files globbing SEED_FILES, 
+
+      # This looks in the path provided for files globbing '*.seeds.rb' files,
       # "requiring" each one.
       # The assumption is that each file will know how to load itself
       def load_seeds(path = './')
         fullpath = File::expand_path(File::join(LT.env.seed_path,path))
-        seedfiles = Dir::glob(File::join(fullpath,'*'+SEED_FILES))
+        seedfiles = Dir::glob(File::join(fullpath, '*.seeds.rb'))
         seedfiles.each do |seedfile|
           load File::expand_path(seedfile)
         end
