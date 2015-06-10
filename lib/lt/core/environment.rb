@@ -109,9 +109,6 @@ module LT
 
       ActiveRecord::Base.configurations = config
       ActiveRecord::Base.establish_connection(DatabaseTasks.env.to_sym)
-    rescue => e
-      logger.error("Cannot connect to DB(#{config}), error: #{e.message}")
-      raise e
     end
 
     def boot_redis(config_file)
