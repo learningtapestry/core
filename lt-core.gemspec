@@ -43,4 +43,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'selenium-webdriver', '>=2.43.0'
   spec.add_dependency 'capybara-webkit', '>=1.3.1'
   spec.add_dependency 'term-ansicolor', '>= 1.3.0'
+  spec.add_dependency 'rake', '~> 10.4.2'
 end
