@@ -14,11 +14,15 @@ module LT
 
     def self.load(root_path, options = {})
       config = new(root_path, options)
-      File.readlines(config.path).each do |line|
-        k, v = line.chomp.split('=', 2)
-        config[k] = v
-      end
+      config.load(File.readlines(config.path))
       config
+    end
+
+    def load(var_defs)
+      var_defs.each do |var_def|
+        k, v = var_def.chomp.split('=', 2)
+        self[k] = v
+      end
     end
 
     def save

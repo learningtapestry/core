@@ -171,10 +171,7 @@ namespace :lt do
       args = ARGV.dup
       args.shift
       config = LT::Configuration.new(Dir.pwd)
-      args.each do |arg|
-        k, v = arg.split('=', 2)
-        config[k] = v
-      end
+      config.load(args)
       config.save
       exit 0
     end
