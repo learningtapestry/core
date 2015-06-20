@@ -168,11 +168,10 @@ namespace :lt do
 
     desc 'Generate the environment configuration file'
     task :generate_env do
-      args = ARGV.dup
-      args.shift
       config = LT::Configuration.new(Dir.pwd)
-      config.load(args)
+      config.load(ARGV.drop(1))
       config.save
+
       exit 0
     end
 
@@ -180,15 +179,14 @@ namespace :lt do
     task :generate_config do
       LT.environment = LT::Environment.new(Dir.pwd, ENV['RACK_ENV'] || 'development')
 
-      args = ARGV.dup
-      args.shift
       config = LT::Configuration.load(Dir.pwd)
-      args.each do |arg|
-        File.write(
-          File.join(LT.env.config_path, arg),
-          config.render(File.read(File.join(LT.env.config_path, "#{arg}.erb")))
-        )
+
+      ARGV.drop(1).each do |file|
+        path = File.join(LT.env.config_path, file)
+        contents = config.render(File.read("#{path}.erb"))
+        File.write(path, contents)
       end
+
       exit 0
     end
 
