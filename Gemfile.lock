@@ -1,10 +1,3 @@
-GIT
-  remote: git://github.com/JackC/edge
-  revision: 64b846d3196812f77de5ecc0548d6fbc13fcb6f1
-  specs:
-    edge (0.4.1)
-      activerecord (>= 3.2.0)
-
 PATH
   remote: .
   specs:
