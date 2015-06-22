@@ -3,8 +3,7 @@ require 'erb'
 require 'log4r'
 require 'log4r/yamlconfigurator'
 require 'ostruct'
-require 'erubis'
-
+require 'dotenv'
 require 'active_record'
 require 'lt/core/seeds'
 
@@ -27,9 +26,9 @@ module LT
     attr_accessor :root_dir
 
     # Application paths
-    attr_accessor :model_path, :config_path, :test_path, :seed_path, :lib_path,
-      :db_path, :message_path, :janitor_path, :partner_lib_path,
-      :web_root_path, :web_asset_path
+    attr_accessor :global_env_path, :specific_env_path, :model_path,
+      :config_path, :test_path, :seed_path, :lib_path, :db_path, :message_path,
+      :janitor_path, :partner_lib_path, :web_root_path, :web_asset_path
     attr_reader :tmp_path, :log_path
 
     # Redis instance
@@ -39,13 +38,15 @@ module LT
     attr_accessor :logger
 
     # Application configurations
-    attr_accessor :pony_config, :merchant_config, :redis_config
+    attr_accessor :pony_config, :merchant_config, :log4r_config, :redis_config
 
     def initialize(root_dir, env = 'development')
       self.root_dir = File.expand_path(root_dir)
       self.run_env = env
 
       setup_environment
+
+      Dotenv.load(global_env_path, specific_env_path)
     end
 
     def self.boot_all(app_root_dir, env = 'development')
@@ -95,6 +96,8 @@ module LT
     end
 
     def setup_environment
+      self.global_env_path = File.join(root_dir, '.env')
+      self.specific_env_path = File.join(root_dir, ".env.#{run_env}")
       self.lib_path = File.join(root_dir, 'lib')
       self.model_path = File.join(lib_path, 'models')
       self.test_path = File.join(root_dir, 'test')
@@ -157,21 +160,17 @@ module LT
 
     # will initialize the logger
     def init_logger
-      # prevent us from re-initializing the logger if it's already created
-      return if self.logger.kind_of?(Logger)
+      self.log4r_config = load_file_config('log4r.yml')
 
-      # Attempt to load configuration file, if doesn't exist, use standard output
-      log4r_config_file = File.expand_path(config_path + "/log4r.yml")
-      if File.exist?(log4r_config_file) then
-        processed = Erubis::Eruby.new(File.read(log4r_config_file)).result(tmp_path: tmp_path, run_env: run_env)
-        log4r_config = YAML.load(processed)
+      if log4r_config
         Log4r::YamlConfigurator.decode_yaml(log4r_config['log4r_config'])
         self.logger = Log4r::Logger[run_env]
       else
         self.logger = Log4r::Logger.new(run_env)
         self.logger.level = Log4r::DEBUG
         self.logger.add Log4r::Outputter.stdout
-        self.logger.warn "Log4r configuration file not found, attempted: #{config_path + "/log4r.yml"}"
+        self.logger.warn
+          "Log4r configuration file #{full_config_path('log4r.yml')} not found."
         self.logger.info "Log4r outputting to stdout with DEBUG level."
       end
     end
@@ -198,11 +197,11 @@ module LT
       DatabaseTasks.db_dir = db_path
       DatabaseTasks.migrations_paths = File.join(db_path, 'migrate')
       DatabaseTasks.seed_loader = LT::Seeds
-      DatabaseTasks.database_configuration = YAML::load_file(path)
+      DatabaseTasks.database_configuration = { run_env => load_config(path) }
     end
 
     def load_config(path)
-      YAML.load_file(path)[run_env].deep_symbolize_keys
+      YAML.load(ERB.new(File.read(path)).result(binding))
     end
   end
 end
