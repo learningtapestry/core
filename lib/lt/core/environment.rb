@@ -127,7 +127,7 @@ module LT
 
       ActiveRecord::Base.establish_connection(DatabaseTasks.env.to_sym)
     rescue => e
-      logger.error("Cannot connect to DB(#{config}), error: #{e.message}")
+      logger.error("Cannot connect to DB, error: #{e.message}")
       raise e
     end
 
