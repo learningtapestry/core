@@ -38,43 +38,36 @@ module LT
     class DBTestBase < TestBase
       def initialize(*opts)
         super(*opts)
-        clean_using_default
-      end
 
-      # call this method to use truncation *once* for current test method
-      # system will reset to using default strategy after the test method executes
-      def clean_using_truncation
-        @pg_strategy = :truncation
-        @redis_strategy = :truncation
         setup_db_cleaner
-      end
-
-      def clean_using_transactions
-        @pg_strategy = :transaction
-        @redis_strategy = :truncation
-        setup_db_cleaner
-      end
-
-      def clean_using_default
-        clean_using_transactions # transactions are our default cleaning strategy
-      end
-
-      def setup_db_cleaner
-        DatabaseCleaner[:active_record].strategy = @pg_strategy
-        DatabaseCleaner[:redis].strategy = @redis_strategy
-        DatabaseCleaner[:redis, { connection: LT.env.redis.connection_string }]
-        # set database transaction, so we can revert seeds
-        DatabaseCleaner.start
       end
 
       def setup
-        super
         setup_db_cleaner
+
+        super
       end
+
       def teardown
         super
-        DatabaseCleaner.clean # cleanup of the database
-        clean_using_default
+
+        DatabaseCleaner.clean
+      end
+
+      def setup_db_cleaner
+        setup_db_cleaner_pg
+        setup_db_cleaner_redis if LT.env.redis_config
+
+        DatabaseCleaner.start
+      end
+
+      def setup_db_cleaner_pg
+        DatabaseCleaner[:active_record].strategy = :transaction
+      end
+
+      def setup_db_cleaner_redis
+        DatabaseCleaner[:redis].strategy = :truncation
+        DatabaseCleaner[:redis, { connection: LT.env.redis.connection_string }]
       end
     end
 

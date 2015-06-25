@@ -171,7 +171,5 @@ task :environment do
   LT.env.boot_db('config.yml')
 end
 
-Rake::Task['environment'].invoke
-
 require 'bundler/setup'
 load 'active_record/railties/databases.rake'

@@ -23,7 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activerecord', '~> 4.2.0'
   spec.add_dependency 'edge'
   spec.add_dependency 'log4r', '>= 1.1.10'
-  spec.add_dependency 'erubis', '~> 2.7.0'
   spec.add_dependency 'redis', '>= 3.2.0'
   spec.add_dependency 'sinatra', '~> 1.4.5'
   spec.add_dependency 'sinatra-contrib', '~> 1.4.2'
@@ -31,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'sinatra-flash', '~> 0.3.0'
   spec.add_dependency 'sinatra-redirect-with-flash', '~> 0.2.1'
   spec.add_dependency 'warden', '~>1.2.3'
-  spec.add_dependency 'minitest', '~> 5.5.1'
+  spec.add_dependency 'minitest', '~> 5.5'
   spec.add_dependency 'rack-test', '~> 0.6.3'
   spec.add_dependency 'nokogiri', '~> 1.6.3'
   spec.add_dependency 'database_cleaner', '>= 1.3.0'
@@ -43,4 +42,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'selenium-webdriver', '>=2.43.0'
   spec.add_dependency 'capybara-webkit', '>=1.3.1'
   spec.add_dependency 'term-ansicolor', '>= 1.3.0'
+  spec.add_dependency 'dotenv', '~> 2.0'
 end
