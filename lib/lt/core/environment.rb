@@ -25,10 +25,13 @@ module LT
     # Holds root application directory
     attr_accessor :root_dir
 
+    # Environmental files
+    attr_accessor :global_env_path, :specific_env_path, :local_env_path
+
     # Application paths
-    attr_accessor :global_env_path, :specific_env_path, :model_path,
-      :config_path, :test_path, :seed_path, :lib_path, :db_path, :message_path,
-      :janitor_path, :partner_lib_path, :web_root_path, :web_asset_path
+    attr_accessor :model_path, :config_path, :test_path, :seed_path, :lib_path,
+      :db_path, :message_path, :janitor_path, :partner_lib_path, :web_root_path,
+      :web_asset_path
     attr_reader :tmp_path, :log_path
 
     # Redis instance
@@ -46,7 +49,7 @@ module LT
 
       setup_environment
 
-      Dotenv.load(specific_env_path, global_env_path)
+      Dotenv.load(local_env_path, specific_env_path, global_env_path)
     end
 
     def self.boot_all(app_root_dir, env = 'development')
@@ -97,6 +100,7 @@ module LT
 
     def setup_environment
       self.global_env_path = File.join(root_dir, '.env')
+      self.local_env_path = File.join(root_dir, '.env.local')
       self.specific_env_path = File.join(root_dir, ".env.#{run_env}")
       self.lib_path = File.join(root_dir, 'lib')
       self.model_path = File.join(lib_path, 'models')
