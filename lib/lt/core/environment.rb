@@ -32,7 +32,7 @@ module LT
     attr_accessor :model_path, :config_path, :test_path, :seed_path, :lib_path,
       :db_path, :message_path, :janitor_path, :partner_lib_path, :web_root_path,
       :web_asset_path
-    attr_reader :tmp_path, :log_path
+    attr_reader :log_path
 
     # Redis instance
     attr_accessor :redis
@@ -91,7 +91,11 @@ module LT
     end
 
     def tmp_path=(path)
-      @tmp_path = File.exists?(path) ? path : Dir.tmpdir
+      @tmp_path = path if File.exists?(path)
+    end
+
+    def tmp_path
+      @tmp_path ||= Dir.tmpdir
     end
 
     def log_path=(path)
