@@ -171,5 +171,10 @@ task :environment do
   LT.env.boot_db('config.yml')
 end
 
+#
+# Needed to make active_record rake tasks available to apps
+#
+Rake::Task['environment'].invoke
+
 require 'bundler/setup'
 load 'active_record/railties/databases.rake'
