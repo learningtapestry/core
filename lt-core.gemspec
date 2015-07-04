@@ -40,7 +40,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'poltergeist', '>= 1.5.1'
   spec.add_dependency 'launchy'
   spec.add_dependency 'selenium-webdriver', '>=2.43.0'
-  spec.add_dependency 'capybara-webkit', '>=1.3.1'
   spec.add_dependency 'term-ansicolor', '>= 1.3.0'
   spec.add_dependency 'dotenv', '~> 2.0'
 end

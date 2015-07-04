@@ -4,7 +4,6 @@ require 'nokogiri'
 require 'database_cleaner'
 require 'capybara'
 require 'capybara/poltergeist'
-require 'capybara/webkit'
 require 'benchmark'
 require 'lt/core'
 
@@ -101,7 +100,7 @@ module LT
       end
     end
 
-    # this test class is used to drive a headless phantomJS/webkit browser
+    # this test class is used to drive a headless phantomJS browser
     # for full front-end testing, including javascript
     class WebAppJSTestBase < WebAppTestBase
       include Capybara::DSL
@@ -112,6 +111,7 @@ module LT
         Capybara.current_session.driver.reset!
         Capybara.use_default_driver
       end
+
       def use_poltergeist
         Capybara.current_driver = :poltergeist
         Capybara.javascript_driver = :poltergeist
@@ -139,16 +139,6 @@ module LT
         Capybara.use_default_driver
       end
 
-      def use_webkit
-        Capybara.javascript_driver = :webkit
-        Capybara.current_driver = :webkit
-        Capybara.default_driver = :webkit
-        Capybara.reset_sessions!
-        Capybara.current_session.driver.reset!
-        Capybara.use_default_driver
-      end
-
-
       def setup
         super
         Capybara.app = app
@@ -158,7 +148,6 @@ module LT
         end
         # use_selenium
         # use poltergeist
-        # use web_kit
         use_poltergeist_debug
       end
 
