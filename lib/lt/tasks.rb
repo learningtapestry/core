@@ -28,7 +28,7 @@ namespace :lt do
   end
 
   desc 'Boot up a console with required context'
-  task console: :boot do
+  task console: :environment do
     require 'irb'
     IRB.setup nil
     IRB.conf[:MAIN_CONTEXT] = IRB::Irb.new.context
@@ -37,7 +37,7 @@ namespace :lt do
   end
 
   desc "Boot up a console with alternative ruby interactive 'pry'"
-  task console_pry: :boot do
+  task console_pry: :environment do
     begin
       require 'pry'; binding.pry
     rescue LoadError
