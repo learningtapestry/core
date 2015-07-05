@@ -95,7 +95,7 @@ namespace :lt do
     end
 
     desc "Monitor files for changes and run a single test when a change is detected"
-    task :monitor => [:'db:setup', :'db:migrate'] do |t, args|
+    task :monitor => [:setenv, :'db:migrate'] do |t, args|
       keep_running = true
       last_test_file = nil
       test_file = ""
