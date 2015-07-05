@@ -28,8 +28,7 @@ namespace :lt do
   end
 
   desc 'Boot up a console with required context'
-  task console: :environment do
-    Rake::Task['lt:boot'.to_sym].invoke
+  task console: :boot do
     require 'irb'
     IRB.setup nil
     IRB.conf[:MAIN_CONTEXT] = IRB::Irb.new.context
