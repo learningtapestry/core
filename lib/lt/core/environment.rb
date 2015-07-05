@@ -49,7 +49,7 @@ module LT
 
       setup_environment
 
-      Dotenv.load(local_env_path, specific_env_path, global_env_path)
+      Dotenv.overload(local_env_path, specific_env_path, global_env_path)
     end
 
     def self.boot_all(app_root_dir, env = 'development')
