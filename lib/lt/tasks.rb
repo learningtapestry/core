@@ -62,15 +62,14 @@ namespace :lt do
   end
 
   namespace :test do
+    task setenv: :environment do
+      ENV['RACK_ENV'] ||= 'test'
+    end
+
     namespace :db do
       desc 'Configure database for the test environment'
-      task :setup do
-        LT.environment = LT::Environment.new(Dir.pwd, 'test')
-        LT.env.boot_db('config.yml')
-      end
-
       desc 'Drop test database'
-      task drop_db: [:setup, 'db:drop']
+      task drop_db: [:setenv, 'db:drop']
 
       desc 'Drop and recreate test database and run migrations'
       task full_reset: [:drop_db, 'db:create', 'db:migrate']
@@ -80,10 +79,10 @@ namespace :lt do
     task run_full_tests: [:'db:drop_db', 'db:create', 'db:schema:load', :test]
 
     desc 'Run complete test suite w/out DB reset or bundling'
-    task :run_tests => [:'db:setup', 'db:migrate', :test]
+    task :run_tests => [:setenv, 'db:migrate', :test]
 
     desc 'Runs a single test file'
-    task :run_test, [:testfile] => [:'db:setup', :'db:migrate'] do |t, args|
+    task :run_test, [:testfile] => [:setenv, :'db:migrate'] do |t, args|
       arg_filename = args[:testfile]
       # if we are given a file with no path, search test folder for the file to run
       if arg_filename == File::basename(arg_filename) then
