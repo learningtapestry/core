@@ -91,7 +91,7 @@ namespace :lt do
         filename = arg_filename
       end
 
-      system("ruby -Ilib -Itest #{filename}")
+      system("bundle exec ruby -Ilib -Itest #{filename}")
     end
 
     desc "Monitor files for changes and run a single test when a change is detected"
