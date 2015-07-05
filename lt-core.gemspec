@@ -36,7 +36,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'database_cleaner', '>= 1.3.0'
   spec.add_dependency 'capybara', '~> 2.4.4'
   spec.add_dependency 'thin', '>= 1.6.3'
-  spec.add_dependency 'rerun', '>=0.10.0'
   spec.add_dependency 'poltergeist', '>= 1.5.1'
   spec.add_dependency 'launchy'
   spec.add_dependency 'selenium-webdriver', '>=2.43.0'
