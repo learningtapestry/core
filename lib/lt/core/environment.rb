@@ -44,11 +44,11 @@ module LT
 
     def initialize(root_dir, env = nil)
       self.root_dir = File.expand_path(root_dir)
+      # calculate current run time environment
+      self.run_env = self.class.calc_env(env)
       # override ENV with Dotenv files
       setup_dotenv
       Dotenv.overload(global_env_path, specific_env_path, local_env_path)
-      # calculate current run time environment
-      self.run_env = self.class.calc_env(env)
       # set up internal state variables
       setup_environment
     end
