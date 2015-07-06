@@ -73,7 +73,6 @@ module LT
     def self.calc_env(user_env = nil)
       return user_env if user_env
       return ENV['RACK_ENV'] if ENV['RACK_ENV'] && ENV['RACK_ENV'].length > 0
-      return ENV['RAILS_ENV'] if ENV['RAILS_ENV'] && ENV['RACK_ENV'].length > 0
       return 'development'
     end
 
