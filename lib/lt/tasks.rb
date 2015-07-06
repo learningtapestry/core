@@ -5,6 +5,15 @@ module LT
   module Term class << self
     include ::Term::ANSIColor
   end; end
+  module Test class << self
+    def run_all_tests
+      $LOAD_PATH.unshift(File::expand_path('./test'))
+      Dir::glob("test/**/**_test.rb").each do |f|
+        file = File::expand_path("./#{f}")
+        require file
+      end
+    end
+  end; end
 end
 
 require 'lt/core'
@@ -51,15 +60,16 @@ namespace :lt do
     LT::Environment.boot_all(Dir.pwd)
   end
 
-  require 'rake/testtask'
+  # TODO Remove this if we decide to keep SM's run_all_tests method above
+  # require 'rake/testtask'
 
-  Rake::TestTask.new do |t|
-    t.libs << 'test'
-    t.pattern = 'test/**/*_test.rb'
-    t.verbose = true
-    # TODO: fix warnings and enable
-    # t.warning = true
-  end
+  # Rake::TestTask.new do |t|
+  #   t.libs << 'test'
+  #   t.pattern = 'test/**/*_test.rb'
+  #   t.verbose = true
+  #   # TODO: fix warnings and enable
+  #   # t.warning = true
+  # end
 
   namespace :test do
     task setenv: :environment do
@@ -76,10 +86,14 @@ namespace :lt do
     end
 
     desc 'Run complete test suite including teardown, rebuild & reseed'
-    task run_full_tests: [:'db:drop_db', 'db:create', 'db:schema:load', :test]
+    task run_full_tests: [:setenv, :'db:full_reset'] do
+      LT::Test::run_all_tests
+    end
 
     desc 'Run complete test suite w/out DB reset or bundling'
-    task :run_tests => [:setenv, 'db:migrate', :test]
+    task :run_tests => [:setenv, :'db:migrate'] do 
+      LT::Test::run_all_tests
+    end
 
     desc 'Runs a single test file'
     task :run_test, [:testfile] => [:setenv, :'db:migrate'] do |t, args|
