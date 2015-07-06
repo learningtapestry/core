@@ -5,7 +5,6 @@ require 'log4r/yamlconfigurator'
 require 'ostruct'
 require 'dotenv'
 require 'active_record'
-require 'lt/core/seeds'
 
 module LT
   class << self
@@ -43,16 +42,18 @@ module LT
     # Application configurations
     attr_accessor :pony_config, :merchant_config, :log4r_config, :redis_config
 
-    def initialize(root_dir, env = 'development')
+    def initialize(root_dir, env = nil)
       self.root_dir = File.expand_path(root_dir)
-      self.run_env = env
-
-      setup_environment
-
+      # override ENV with Dotenv files
+      setup_dotenv
       Dotenv.overload(global_env_path, specific_env_path, local_env_path)
+      # calculate current run time environment
+      self.run_env = self.class.calc_env(env)
+      # set up internal state variables
+      setup_environment
     end
 
-    def self.boot_all(app_root_dir, env = 'development')
+    def self.boot_all(app_root_dir, env = nil)
       env = Environment.new(app_root_dir, env)
 
       env.init_logger
@@ -63,6 +64,15 @@ module LT
       env.logger.info("Core-app booted (mode: #{env.run_env})")
 
       LT.environment = env
+    end
+
+    # Calculate current running environment based on internal state
+    # Or, if not found, find state in ENV
+    # Defaults to 'development'
+    def self.calc_env(user_env = nil)
+      return user_env if user_env
+      return ENV['RACK_ENV'] if ENV['RACK_ENV'] && ENV['RACK_ENV'].length > 0
+      return 'development'
     end
 
     def env?(type)
@@ -102,10 +112,13 @@ module LT
       @log_path = File.exists?(path) ? path : tmp_path
     end
 
-    def setup_environment
+    def setup_dotenv
       self.global_env_path = File.join(root_dir, '.env')
       self.local_env_path = File.join(root_dir, '.env.local')
       self.specific_env_path = File.join(root_dir, ".env.#{run_env}")
+    end
+
+    def setup_environment
       self.lib_path = File.join(root_dir, 'lib')
       self.model_path = File.join(lib_path, 'models')
       self.test_path = File.join(root_dir, 'test')
