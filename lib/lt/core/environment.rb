@@ -5,7 +5,6 @@ require 'log4r/yamlconfigurator'
 require 'ostruct'
 require 'dotenv'
 require 'active_record'
-require 'lt/core/seeds'
 
 module LT
   class << self
