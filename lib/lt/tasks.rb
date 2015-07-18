@@ -72,31 +72,33 @@ namespace :lt do
   # end
 
   namespace :test do
-    task setenv: :environment do
-      ENV['RACK_ENV'] ||= 'test'
-    end
 
     namespace :db do
       desc 'Configure database for the test environment'
       desc 'Drop test database'
-      task drop_db: [:setenv, 'db:drop']
+      task drop_db: [:test_environment, 'db:drop']
 
       desc 'Drop and recreate test database and run migrations'
       task full_reset: [:drop_db, 'db:create', 'db:migrate']
     end
 
+    task :test_environment do
+      ENV['RACK_ENV'] = 'test'
+      Rake::Task['environment'].invoke
+    end
+
     desc 'Run complete test suite including teardown, rebuild & reseed'
-    task run_full_tests: [:setenv, :'db:full_reset'] do
+    task run_full_tests: [:test_environment, :'db:full_reset'] do
       LT::Test::run_all_tests
     end
 
     desc 'Run complete test suite w/out DB reset or bundling'
-    task :run_tests => [:setenv, :'db:migrate'] do 
+    task :run_tests => [:test_environment, :'db:migrate'] do 
       LT::Test::run_all_tests
     end
 
     desc 'Runs a single test file'
-    task :run_test, [:testfile] => [:setenv, :'db:migrate'] do |t, args|
+    task :run_test, [:testfile] => [:test_environment, :'db:migrate'] do |t, args|
       arg_filename = args[:testfile]
       # if we are given a file with no path, search test folder for the file to run
       if arg_filename == File::basename(arg_filename) then
@@ -109,7 +111,7 @@ namespace :lt do
     end
 
     desc "Monitor files for changes and run a single test when a change is detected"
-    task :monitor => [:setenv, :'db:migrate'] do |t, args|
+    task :monitor => [:test_environment, :'db:migrate'] do |t, args|
       keep_running = true
       last_test_file = nil
       test_file = ""
@@ -179,15 +181,9 @@ end # lt namespace
 
 task :environment do
   env = ENV['RACK_ENV'] || 'development'
-
   LT.environment = LT::Environment.new(Dir.pwd, env)
   LT.env.boot_db('config.yml')
 end
-
-#
-# Needed to make active_record rake tasks available to apps
-#
-Rake::Task['environment'].invoke
 
 require 'bundler/setup'
 load 'active_record/railties/databases.rake'
