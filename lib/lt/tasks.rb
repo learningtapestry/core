@@ -82,10 +82,9 @@ namespace :lt do
       task full_reset: [:drop_db, 'db:create', 'db:migrate']
     end
 
-    task :test_environment do
-      ENV['RACK_ENV'] = 'test'
-      Rake::Task['environment'].invoke
-    end
+    task :set_test_environment do; ENV['RACK_ENV'] = 'test'; end
+
+    task test_environment: [:set_test_environment, :environment]
 
     desc 'Run complete test suite including teardown, rebuild & reseed'
     task run_full_tests: [:test_environment, :'db:full_reset'] do
@@ -187,3 +186,9 @@ end
 
 require 'bundler/setup'
 load 'active_record/railties/databases.rake'
+
+Rake.application.tasks.select do |task|
+  if task.name.start_with?('db:')
+    task.enhance [:environment]
+  end
+end
