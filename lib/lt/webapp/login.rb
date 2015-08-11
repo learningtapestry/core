@@ -37,13 +37,6 @@ module LT
         app.helpers Login::Helpers
         app.use Rack::Session::Cookie, :expire_after => 2592000, :secret => '3xWmSSa5X65Fyzn4jVwpM73zBtk5aXDn5CHuuQaB'
 
-        # Warden calls this method without actually redirecting here
-        # So the content of the page where login was attempted will
-        # be whatever is returned here
-        app.post app.vroute(:unauthenticated, '/unauthenticated') do
-          'Login failure here'
-        end
-
         app.use Warden::Manager do |manager|
           manager.default_strategies :password
           manager.failure_app = app
