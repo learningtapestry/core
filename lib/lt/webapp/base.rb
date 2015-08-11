@@ -5,7 +5,6 @@ require 'sinatra/param'
 require 'sinatra/flash'
 require 'sinatra/redirect_with_flash'
 require_relative 'routes'
-require_relative 'login'
 require_relative 'views'
 
 module LT
@@ -52,7 +51,6 @@ module LT
       helpers Sinatra::RedirectWithFlash
 
       register LT::WebApp::Routes
-      register LT::WebApp::Login
       register LT::WebApp::Views
 
       # set up UI layout container
