@@ -60,6 +60,9 @@ namespace :lt do
     LT::Environment.boot_all(Dir.pwd)
   end
 
+  desc 'Default deploy task to be extended by applications'
+  task :deploy do; end
+
   # TODO Remove this if we decide to keep SM's run_all_tests method above
   # require 'rake/testtask'
 
