@@ -35,7 +35,7 @@ module LT
 
       def self.registered(app)
         app.helpers Login::Helpers
-        app.use Rack::Session::Cookie, :expire_after => 2592000, :secret => '3xWmSSa5X65Fyzn4jVwpM73zBtk5aXDn5CHuuQaB'
+        app.use Rack::Session::Cookie, :secret => '3xWmSSa5X65Fyzn4jVwpM73zBtk5aXDn5CHuuQaB'
 
         app.use Warden::Manager do |manager|
           manager.default_strategies :password
@@ -55,7 +55,7 @@ module LT
           end
 
           def authenticate!
-            if params[:username] =~ /@/ 
+            if params[:username] =~ /@/
               user = Email.find_by_email(params['username']).user
             else
               user = User.find_by_username(params['username'])
