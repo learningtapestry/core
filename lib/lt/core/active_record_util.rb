@@ -1,5 +1,6 @@
 require 'active_record'
 require 'edge'
+require_relative 'active_record_util/rememberable'
 
 module LT
   module ActiveRecordUtil
@@ -16,6 +17,10 @@ module LT
 
       def acts_as_draft
         include LT::ActiveRecordUtil::Draft
+      end
+
+      def acts_as_rememberable
+        include LT::ActiveRecordUtil::Rememberable
       end
     end
     ActiveRecord::Base.extend(ActsAsMethods)
@@ -67,7 +72,7 @@ module LT
         end
 
         def total_pages(per_page=10)
-          total = (self.count + per_page - 1)/per_page 
+          total = (self.count + per_page - 1)/per_page
           total > 0 ? total : 1
         end
       end # ClassMethods
@@ -90,7 +95,7 @@ module LT
       def published?
         !draft
       end
-    end # Proposal
+    end # Draft
 
     module Raw class << self
       # returns an array of all the tables in schema public for current connection
