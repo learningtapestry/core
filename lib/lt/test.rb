@@ -89,10 +89,16 @@ module LT
       def assert_200(msg="")
         assert_equal(200, last_response.status, msg)
       end
+
       def assert_302(redirection_path, msg="")
         assert_equal(302, last_response.status, msg)
         redirection_regex = %r{:\/\/[^/]+#{redirection_path}}
         assert_match(redirection_regex, last_response.location)
+      end
+
+      def get_cookie(cookie)
+        cookies = CGI::Cookie::parse(last_response.header['Set-Cookie'])
+        cookies[cookie].empty? ? nil : cookies[cookie]
       end
 
       def get_html
@@ -121,9 +127,9 @@ module LT
         Capybara.use_default_driver
       end
 
-      # To use the poltergeist javascript debugger add "page.driver.debug" 
+      # To use the poltergeist javascript debugger add "page.driver.debug"
       # in test file, *before* the JS code call you want to debug
-      # When you run your test, you'll get a new window in chrome. 
+      # When you run your test, you'll get a new window in chrome.
       # Click the second link on the page that is opened for you in chrome
       # That link opens your code/page - select the JS file from the upper left pull-down
       # Set a breakpoint where you want to intercept the code
