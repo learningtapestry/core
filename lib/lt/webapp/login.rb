@@ -62,7 +62,6 @@ module LT
               user = User.find_by_username(params['username'])
             end
             if user && user.authenticate(params['password'])
-              user.remember_me = !!params['remember_me']
               success!(user)
             else
               throw(:warden, previous_page: '/', message: 'We were not able to log you in. Please check your email and password and try again.')
