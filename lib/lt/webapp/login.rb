@@ -36,7 +36,7 @@ module LT
 
       def self.registered(app)
         app.helpers Login::Helpers
-        app.use Rack::Session::Cookie, :secret => '3xWmSSa5X65Fyzn4jVwpM73zBtk5aXDn5CHuuQaB'
+        app.use Rack::Session::Cookie, :secret => LT.env.secret_config['secret_key_base']
 
         app.use Warden::Manager do |manager|
           manager.default_strategies :rememberable, :password
