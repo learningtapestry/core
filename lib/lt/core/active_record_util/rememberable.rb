@@ -69,7 +69,6 @@ module LT
         # Generate a token checking if one does not already exist in the database.
         def remember_token #:nodoc:
           loop do
-            # binding.pry
             token = friendly_token
             break token unless find_by_remember_token( token )
           end
@@ -77,13 +76,11 @@ module LT
 
         # Create the cookie key using the record id and remember_token
         def serialize_into_cookie(record)
-          # binding.pry
-          Marshal::dump([record.id, record.remember_token])
+          [record.id, record.remember_token]
         end
 
         # Recreate the user based on the stored cookie
         def serialize_from_cookie(id, remember_token)
-          # binding.pry
           record = find_by id: id
           record if record && !record.remember_expired? &&
                     self.secure_compare(record.remember_token, remember_token)

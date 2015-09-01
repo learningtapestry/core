@@ -1,9 +1,12 @@
 require 'warden'
+require 'lt/session/signed_cookie'
 
 module LT
   module WebApp
     module Login
       module Helpers
+        include LT::Session::SignedHelpers
+
         def warden
           env['warden']
         end
@@ -115,7 +118,8 @@ module LT
           end
 
           def remember_cookie
-            @remember_cookie ||= Marshal::load(request.cookies['remember_token']) if request.cookies['remember_token']
+            cookie = request.cookies['remember_token']
+            @remember_cookie ||= Class.new.extend(LT::Session::SignedHelpers).unencrypt_cookie(cookie) if cookie
           end
 
         end
