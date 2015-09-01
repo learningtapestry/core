@@ -188,6 +188,7 @@ task :environment do
   LT.env.boot_db('config.yml')
 end
 
+# taken from https://github.com/rails/rails/blob/master/railties/lib/rails/tasks/misc.rake#L1
 desc 'Generate a cryptographically secure secret key (this is typically used to generate a secret for cookie sessions).'
 task :secret do
   require 'securerandom'

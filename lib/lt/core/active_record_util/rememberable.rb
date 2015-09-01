@@ -1,3 +1,10 @@
+# Most of this code were taken from devise files:
+
+# https://github.com/plataformatec/devise/blob/master/lib/devise.rb
+# https://github.com/plataformatec/devise/blob/master/lib/devise/models/rememberable.rb
+
+# and adapted to our needs
+
 require 'active_support/concern'
 
 module LT

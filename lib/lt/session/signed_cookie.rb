@@ -1,3 +1,10 @@
+# Most of this code were taken from rails files:
+#
+# https://github.com/rails/rails/blob/master/railties/lib/rails/application.rb
+# https://github.com/rails/rails/blob/master/actionpack/lib/action_dispatch/middleware/cookies.rb
+#
+# and adapted to our needs
+
 require 'action_dispatch/middleware/cookies'
 require 'active_support/key_generator'
 

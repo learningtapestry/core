@@ -53,6 +53,9 @@ module LT
           env['REQUEST_METHOD'] = 'POST'
         end
 
+        # Code taken and adapted from:
+        # https://github.com/plataformatec/devise/blob/master/lib/devise/strategies/rememberable.rb
+
         Warden::Strategies.add(:password) do
           def valid?
             params['username'] || params['password'] || params['next_page']
