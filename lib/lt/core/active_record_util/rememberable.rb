@@ -84,7 +84,7 @@ module LT
         # Recreate the user based on the stored cookie
         def serialize_from_cookie(id, remember_token)
           # binding.pry
-          record = find(id)
+          record = find_by id: id
           record if record && !record.remember_expired? &&
                     self.secure_compare(record.remember_token, remember_token)
         end
