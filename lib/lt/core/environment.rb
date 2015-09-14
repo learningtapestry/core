@@ -40,7 +40,8 @@ module LT
     attr_accessor :logger
 
     # Application configurations
-    attr_accessor :pony_config, :merchant_config, :log4r_config, :redis_config
+    attr_accessor :pony_config, :merchant_config, :log4r_config, :redis_config,
+      :secret_config
 
     def initialize(root_dir, env = nil)
       self.root_dir = File.expand_path(root_dir)
@@ -137,7 +138,7 @@ module LT
 
     def load_all_models
       models = Dir::glob(File::join(model_path, '*.rb'))
-      models.each do |file| 
+      models.each do |file|
         full_file =  File::join(model_path, File::basename(file))
         require full_file
       end
@@ -177,6 +178,7 @@ module LT
       self.redis_config = load_file_config('redis.yml')
       self.pony_config = load_file_config('pony.yml')
       self.merchant_config = load_file_config('merchant.yml')
+      self.secret_config =  load_file_config('secrets.yml')
     end
 
     # will initialize the logger

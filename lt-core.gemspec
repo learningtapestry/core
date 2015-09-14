@@ -21,6 +21,8 @@ Gem::Specification.new do |spec|
   # use add_dependency where this gem needs a gem in order to function
   # spec.add_dependency "gem dependency"
   spec.add_dependency 'activerecord', '~> 4.2.0'
+  spec.add_dependency 'activesupport', '~> 4.2.0'
+  spec.add_dependency 'actionpack', '~> 4.2.0'
   spec.add_dependency 'edge'
   spec.add_dependency 'log4r', '>= 1.1.10'
   spec.add_dependency 'redis', '>= 3.2.0'

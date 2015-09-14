@@ -95,7 +95,7 @@ namespace :lt do
     end
 
     desc 'Run complete test suite w/out DB reset or bundling'
-    task :run_tests => [:test_environment, :'db:migrate'] do 
+    task :run_tests => [:test_environment, :'db:migrate'] do
       LT::Test::run_all_tests
     end
 
@@ -179,12 +179,20 @@ namespace :lt do
       end # while keep_running do -- main loop
     end # task :monitor
   end # test namesapce
+
 end # lt namespace
 
 task :environment do
   env = ENV['RACK_ENV'] || 'development'
   LT.environment = LT::Environment.new(Dir.pwd, env)
   LT.env.boot_db('config.yml')
+end
+
+# taken from https://github.com/rails/rails/blob/master/railties/lib/rails/tasks/misc.rake#L1
+desc 'Generate a cryptographically secure secret key (this is typically used to generate a secret for cookie sessions).'
+task :secret do
+  require 'securerandom'
+  puts SecureRandom.hex(64)
 end
 
 require 'bundler/setup'

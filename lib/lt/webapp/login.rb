@@ -1,9 +1,12 @@
 require 'warden'
+require 'lt/session/signed_cookie'
 
 module LT
   module WebApp
     module Login
       module Helpers
+        include LT::Session::SignedHelpers
+
         def warden
           env['warden']
         end
@@ -13,13 +16,14 @@ module LT
         end
 
         def logged_in?
-          warden.authenticated?
+          # The difference between authenticate? and authenticated?
+          # is that the former will run strategies if the user has not yet been
+          # authenticated, and the second relies on already performed ones.
+          warden.authenticate?
         end
 
         def check_authentication
-          unless warden.authenticated?
-            redirect '/login'
-          end
+          redirect '/login' unless logged_in?
         end
 
         def check_admin
@@ -35,10 +39,10 @@ module LT
 
       def self.registered(app)
         app.helpers Login::Helpers
-        app.use Rack::Session::Cookie, :expire_after => 2592000, :secret => '3xWmSSa5X65Fyzn4jVwpM73zBtk5aXDn5CHuuQaB'
+        app.use Rack::Session::Cookie, :secret => LT.env.secret_config['secret_key_base']
 
         app.use Warden::Manager do |manager|
-          manager.default_strategies :password
+          manager.default_strategies :rememberable, :password
           manager.failure_app = app
           manager.intercept_401 = false
           manager.serialize_into_session {|user| user.id}
@@ -55,7 +59,7 @@ module LT
           end
 
           def authenticate!
-            if params[:username] =~ /@/ 
+            if params[:username] =~ /@/
               user = Email.find_by_email(params['username']).user
             else
               user = User.find_by_username(params['username'])
@@ -67,6 +71,62 @@ module LT
             end
           end
         end
+
+        # Rememberable strategy taken and adapted from:
+        # https://github.com/plataformatec/devise/blob/master/lib/devise/strategies/rememberable.rb
+
+        Warden::Strategies.add(:rememberable) do
+
+          # A valid strategy for rememberable needs a remember token in the cookies.
+          def valid?
+            @remember_cookie = nil
+            remember_cookie.present?
+          end
+
+          def authenticate!
+            user = User.serialize_from_cookie(*remember_cookie)
+
+            if user
+              remember_me(user)
+              extend_remember_me_period(user)
+              success!(user)
+            else
+              request.cookies.delete('remember_token')
+              return pass
+            end
+
+          end
+
+        private
+
+          # Get values from params and set in the resource.
+          def remember_me(resource)
+            resource.remember_me = remember_me? if resource.respond_to?(:remember_me=)
+          end
+
+          # Should this resource be marked to be remembered?
+          def remember_me?
+            valid_params? && [true, 1, '1', 't', 'T', 'true', 'TRUE'].include?(params[:remember_me])
+          end
+
+          # If the request is valid, finally check if params_auth_hash returns a hash.
+          def valid_params?
+            params.is_a?(Hash)
+          end
+
+          def extend_remember_me_period(resource)
+            if resource.respond_to?(:extend_remember_period=)
+              resource.extend_remember_period = LT::ActiveRecordUtil::Rememberable.extend_remember_period
+            end
+          end
+
+          def remember_cookie
+            cookie = request.cookies['remember_token']
+            @remember_cookie ||= Class.new.extend(LT::Session::SignedHelpers).unencrypt_cookie(cookie) if cookie
+          end
+
+        end
+
       end
     end
   end
