@@ -43,4 +43,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'selenium-webdriver', '>=2.43.0'
   spec.add_dependency 'term-ansicolor', '>= 1.3.0'
   spec.add_dependency 'dotenv', '~> 2.0'
+  spec.add_dependency 'minitest-profile'
+
 end

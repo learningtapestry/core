@@ -7,6 +7,16 @@ require 'capybara/poltergeist'
 require 'benchmark'
 require 'lt/core'
 
+if ENV.fetch('TESTOPTS', '').include? '--profile'
+  require 'minitest/profile'
+
+  module Minitest
+    def self.plugin_profile_options(opts, options)
+      options[:profile] = true
+    end
+  end
+end
+
 module LT
   module Test
     class TestBase < Minitest::Test
