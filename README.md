@@ -37,6 +37,20 @@ SampleWebApp.boot
 run SampleWebApp
 ```
 
+## Running tests
+
+```
+# running a specific test file
+rake lt:test:run_test[specific_test_name]
+
+# running all tests (with full reset)
+rake full_tests
+
+# running tests with profiler
+TESTOPTS='--profile' rake full_tests
+TESTOPTS='--profile' rake lt:test:run_test[any_test_filename]
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/learningtapestry/core/fork )
