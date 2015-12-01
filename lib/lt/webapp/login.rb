@@ -27,7 +27,7 @@ module LT
         end
 
         def check_admin
-          unless session_user.admin?
+          unless session_user && session_user.admin?
             redirect '/login'
           end
         end
