@@ -20,9 +20,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
   # use add_dependency where this gem needs a gem in order to function
   # spec.add_dependency "gem dependency"
-  spec.add_dependency 'activerecord', '~> 4.2.0'
-  spec.add_dependency 'activesupport', '~> 4.2.0'
-  spec.add_dependency 'actionpack', '~> 4.2.0'
+  spec.add_dependency 'activerecord', '~> 4.2.10'
+  spec.add_dependency 'activesupport', '~> 4.2.10'
+  spec.add_dependency 'actionpack', '~> 4.2.10'
   spec.add_dependency 'edge'
   spec.add_dependency 'log4r', '>= 1.1.10'
   spec.add_dependency 'redis', '>= 3.2.0'
@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'warden', '~>1.2.3'
   spec.add_dependency 'minitest', '~> 5.5'
   spec.add_dependency 'rack-test', '~> 0.6.3'
-  spec.add_dependency 'nokogiri', '~> 1.6.3'
+  spec.add_dependency 'nokogiri', '~> 1.8.1'
   spec.add_dependency 'database_cleaner', '>= 1.3.0'
   spec.add_dependency 'capybara', '~> 2.4.4'
   spec.add_dependency 'thin', '>= 1.6.3'
