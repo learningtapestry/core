@@ -187,7 +187,16 @@ module LT
 
       if log4r_config
         Log4r::YamlConfigurator.decode_yaml(log4r_config['log4r_config'])
-        self.logger = Log4r::Logger[run_env]
+
+        environments = log4r_config['log4r_config']['loggers'].map do |logger|
+          logger['name']
+        end
+
+        if environments.include?(run_env)
+          self.logger = Log4r::Logger[run_env]
+        else
+          self.logger = Log4r::Logger['development']
+        end
       else
         self.logger = Log4r::Logger.new(run_env)
         self.logger.level = Log4r::DEBUG
