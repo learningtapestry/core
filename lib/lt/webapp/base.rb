@@ -7,9 +7,13 @@ require 'sinatra/redirect_with_flash'
 require_relative 'routes'
 require_relative 'views'
 
+require 'rack-mini-profiler'
+
 module LT
   module WebApp
     class Base < Sinatra::Base
+      use Rack::MiniProfiler
+
       def self.inherited(base)
         load_all_routes
         super(base)
