@@ -15,7 +15,6 @@ PATH
       minitest-profile
       nokogiri (~> 1.8.1)
       poltergeist (>= 1.5.1)
-      rack-mini-profiler
       rack-test (~> 0.6.3)
       redis (>= 3.2.0)
       selenium-webdriver (>= 2.43.0)
@@ -103,8 +102,6 @@ GEM
       websocket-driver (>= 0.2.0)
     public_suffix (3.0.1)
     rack (1.6.8)
-    rack-mini-profiler (0.10.7)
-      rack (>= 1.2.0)
     rack-protection (1.5.3)
       rack
     rack-test (0.6.3)
