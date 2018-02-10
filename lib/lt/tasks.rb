@@ -46,7 +46,7 @@ namespace :lt do
   end
 
   desc "Boot up a console with alternative ruby interactive 'pry'"
-  task console_pry: :environment do
+  task console_pry: :boot do
     begin
       require 'pry'; binding.pry
     rescue LoadError
