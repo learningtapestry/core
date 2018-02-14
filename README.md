@@ -2,6 +2,8 @@
 
 lt-core - LearningTapestry core modules and classes.
 
+[ ![Codeship Status for learningtapestry/core](https://app.codeship.com/projects/b4c06840-5a20-0133-9904-72256058fde0/status?branch=master)](https://app.codeship.com/projects/110250)
+
 ## Installation
 
 Add this line to your application's Gemfile:
