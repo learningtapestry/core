@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'warden', '~>1.2.3'
   spec.add_dependency 'minitest', '~> 5.5'
   spec.add_dependency 'rack-test', '~> 0.6.3'
-  spec.add_dependency 'nokogiri', '~> 1.8.1'
+  spec.add_dependency 'nokogiri', '~> 1.8.2'
   spec.add_dependency 'database_cleaner', '>= 1.3.0'
   spec.add_dependency 'capybara', '~> 2.4.4'
   spec.add_dependency 'thin', '>= 1.6.3'
