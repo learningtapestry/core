@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'edge'
   spec.add_dependency 'log4r', '>= 1.1.10'
   spec.add_dependency 'redis', '>= 3.2.0'
-  spec.add_dependency 'sinatra', '~> 1.4.5'
+  spec.add_dependency 'sinatra', '~> 1.4.8'
   spec.add_dependency 'sinatra-contrib', '~> 1.4.2'
   spec.add_dependency 'sinatra-param', ">= 1.2.2"
   spec.add_dependency 'sinatra-flash', '~> 0.3.0'

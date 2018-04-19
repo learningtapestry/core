@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    lt-core (0.1.0)
+    lt-core (0.1.1)
       actionpack (~> 4.2.10)
       activerecord (~> 4.2.10)
       activesupport (~> 4.2.10)
@@ -18,7 +18,7 @@ PATH
       rack-test (~> 0.6.3)
       redis (>= 3.2.0)
       selenium-webdriver (>= 2.43.0)
-      sinatra (~> 1.4.5)
+      sinatra (~> 1.4.8)
       sinatra-contrib (~> 1.4.2)
       sinatra-flash (~> 0.3.0)
       sinatra-param (>= 1.2.2)
