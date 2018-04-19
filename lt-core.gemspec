@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{Sample gem summary}
   spec.description   = %q{Sample gem descr}
   spec.homepage      = "http://www.learningtapestry.com"
-  spec.license       = "(c) 2015 Learning Tapestry, all rights reservered."
+  spec.license       = "(c) 2015-2018 Learning Tapestry, all rights reserved."
   # include all files required to run
   spec.files         = Dir::glob('lib/**/**').delete_if {|f| !File::file?(f)} << 'Gemfile' << 'Rakefile'
   # put any files in ./bin if you want them auto-installed to path when gem is installed
